@@ -9,4 +9,5 @@ bin
 .gradle
 .vscode
 .bsp
+.metals
 .DS_STORE
