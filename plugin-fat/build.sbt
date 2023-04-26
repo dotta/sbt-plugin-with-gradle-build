@@ -2,7 +2,12 @@
 def commonSettings = Seq(
   version := "0.0.1-SNAPSHOT",
   organization := "com.github.dotta",
-  scalaVersion := "2.12.13"
+  scalaVersion := "2.12.13",
+  pluginCrossBuild / sbtVersion := {
+    scalaBinaryVersion.value match {
+      case "2.12" => "1.5.0" // set minimum sbt version
+    }
+  },
 )
 
 lazy val `sbt-hello-world-thin` = project
