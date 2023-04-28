@@ -1,6 +1,6 @@
 plugins {
     scala
-    `maven-publish`
+    `ivy-publish`
 }
 
 repositories {
@@ -14,26 +14,31 @@ dependencies {
     implementation("org.scala-lang:scala-library:2.12.13")
 }
 
-tasks.jar {
-  manifest {
-    archiveBaseName.set("sbt-hello-world")
-  }
-}
-
 publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "com.github.dotta"
-            artifactId = "sbt-hello-world_2.12_1.0"
-            version = "0.0.1-SNAPSHOT"
-            from(components["java"])
-            pom {
-                properties.set(mapOf(
-                    "scalaVersion" to "2.12",
-                    "sbtVersion" to "1.0"
-                ))
-                setPackaging("jar")
+    repositories {
+        ivy {
+            // Configure the Ivy repository
+            url = uri("${System.getProperty("user.home")}/.m2/repository")
+            patternLayout {
+                artifact("[organisation]/[module]_2.12_1.0/[revision]/[artifact]-[revision](-[classifier])(.[ext])")
+                ivy("[organisation]/[module]_2.12_1.0/[revision]/ivy-[revision].xml")
+                setM2compatible(true) // this converts the "." into "/" from the set "organisation"
             }
         }
     }
+    publications {
+         create<IvyPublication>("ivy") {
+            organisation = "com.github.dotta"
+            module = "sbt-hello-world"
+            revision = project.version as String
+            from(components["java"])
+            // A .pom file doesn't even need to be pushed for sbt resolve the published plugin
+            //artifact(module + "-" + revision + ".pom")
+        }
+    }
+}
+
+// As a non-standard layout format is used for publishing, the Gradle metadata can't be generated.
+tasks.withType<GenerateModuleMetadata> {
+    enabled = false
 }
